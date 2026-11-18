@@ -52,6 +52,11 @@ not exposed; communication remains in the app.
   unavailable API from an unavailable database.
 - TypeORM is available from Phase 1 through a dedicated connection definition; entities
   and the API's database module arrive with Supabase authentication in Phase 2.
+- Supabase access tokens are verified with the provider's public JWKS keys. App roles
+  live in Mistri's `users` table, not in client-provided data or mutable JWT metadata.
+- New verified identities are provisioned as `customer`. The API has no self-service
+  admin role assignment; controlled role changes are deferred to the appropriate
+  verification/admin workflows.
 - Environment files are ignored. Only `.env.example` templates are versioned.
 
 ## Free-tier constraints to track

@@ -2,7 +2,7 @@
 
 ## Current phase
 
-**Phase 1 — complete: repository and local development foundation**
+**Phase 2 — in progress: Supabase connection, authentication, JWT, and roles**
 
 ### Completed
 
@@ -23,11 +23,31 @@
 - Verified `GET /health` returns HTTP 200, Swagger is available at `/docs`, and the
   TypeORM probe reports PostGIS 3.4.
 
+### Phase 2 completed locally
+
+- Added a versioned `users` table migration with `customer`, `mechanic`, and `admin`
+  roles, plus user email and phone profile fields.
+- Connected the NestJS API to TypeORM and applied the migration to local Postgres.
+- Added Supabase JWT verification through its public JWKS endpoint and bearer-token
+  guard protection for `GET /auth/me`.
+- Added server-side role authorization with an admin-only example endpoint. Clients
+  cannot self-assign roles; newly verified users default to `customer`.
+- Added unit tests for bearer-token enforcement, JWT audience/signature validation, and
+  customer rejection on an admin-only route.
+- Added [SUPABASE_SETUP.md](SUPABASE_SETUP.md) with exact free-tier project, email, and
+  Google OAuth setup instructions.
+
+### External configuration still required
+
+- Create the Supabase project and configure `backend/.env` with its database connection
+  URL and project URL.
+- Enable the Email and Google auth providers in your own Supabase/Google accounts. These
+  provider accounts and secrets cannot be created or handled by the codebase.
+
 ## Next phase
 
-**Phase 2 — Supabase connection, Google/email authentication, JWT, and roles**
-
-Do not begin until Phase 1 verification is complete and the user says `next`.
+**Finish Phase 2 cloud configuration, then begin Phase 3 — mechanic profiles,
+online/offline, current location, and PostGIS nearby search.**
 
 ## Known issues
 
