@@ -1,0 +1,24 @@
+{
+  "name": "mistri",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mistri (মিস্ত্রি) — roadside mechanic assistance for Bangladesh",
+  "workspaces": [
+    "backend",
+    "mobile",
+    "admin"
+  ],
+  "scripts": {
+    "dev:backend": "npm run start:dev --workspace=backend",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
