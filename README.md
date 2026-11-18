@@ -1,7 +1,7 @@
 # Mistri (মিস্ত্রি)
 
-Mistri is a Bangladesh-first mobile app for finding and requesting nearby roadside
-mechanics and garages.
+Mistri is a Bangladesh-first roadside assistance app that connects drivers with nearby
+mechanics and garages when their vehicles break down.
 
 ## Repository layout
 
