@@ -31,6 +31,7 @@ async function bootstrap(): Promise<void> {
     .setTitle('Mistri API')
     .setDescription('API for roadside mechanic assistance in Bangladesh')
     .setVersion('0.1.0')
+    .addBearerAuth()
     .build();
   SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, openApiConfiguration));
 
