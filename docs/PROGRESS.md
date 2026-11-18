@@ -35,3 +35,6 @@ Do not begin until Phase 1 verification is complete and the user says `next`.
   port `5432`. The Docker container's internal database port remains `5432`.
 - Docker Desktop's command-line folder was added to the Windows user PATH. A newly
   opened terminal is needed before the `docker` command becomes available by name.
+- `npm audit --omit=dev` reports three moderate advisories through TypeORM 0.3.31's
+  `glob`/`minimatch` chain. The offered remediation is a breaking TypeORM 1.1 upgrade;
+  do not run `npm audit fix --force`. Review that upgrade deliberately during Phase 10.
