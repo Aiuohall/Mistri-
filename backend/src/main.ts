@@ -9,6 +9,7 @@ import type { EnvironmentVariables } from './config/environment.validation';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService<EnvironmentVariables, true>);
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
   const allowedOrigins = config
     .getOrThrow<string>('CORS_ORIGINS')
     .split(',')
@@ -27,13 +28,15 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  const openApiConfiguration = new DocumentBuilder()
-    .setTitle('Mistri API')
-    .setDescription('API for roadside mechanic assistance in Bangladesh')
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, openApiConfiguration));
+  if (config.getOrThrow<boolean>('ENABLE_SWAGGER')) {
+    const openApiConfiguration = new DocumentBuilder()
+      .setTitle('Mistri API')
+      .setDescription('API for roadside mechanic assistance in Bangladesh')
+      .setVersion('0.1.0')
+      .addBearerAuth()
+      .build();
+    SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, openApiConfiguration));
+  }
 
   await app.listen(config.getOrThrow('PORT'), '0.0.0.0');
 }

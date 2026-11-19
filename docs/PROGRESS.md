@@ -2,7 +2,7 @@
 
 ## Current phase
 
-**Phase 2 — in progress: Supabase connection, authentication, JWT, and roles**
+**Phase 3 — completed locally: mechanic profiles, availability, locations, and nearby search**
 
 ### Completed
 
@@ -44,10 +44,21 @@
 - Enable the Email and Google auth providers in your own Supabase/Google accounts. These
   provider accounts and secrets cannot be created or handled by the codebase.
 
+### Phase 3 completed locally
+
+- Added a versioned `mechanics` migration with a one-to-one user profile, online status,
+  service types, and a latest-location-only PostGIS geography point.
+- Added protected mechanic profile, online/offline, and location-update endpoints. Going
+  offline clears the saved location; updates require at least 15 seconds and 50 metres of
+  movement.
+- Added `GET /mechanics/nearby`, which only returns online mechanics with a current
+  location, searches with `ST_DWithin`, and orders results by spatial distance.
+- Added unit coverage for profile creation, presence and location privacy, location-update
+  constraints, and nearby result mapping.
+
 ## Next phase
 
-**Finish Phase 2 cloud configuration, then begin Phase 3 — mechanic profiles,
-online/offline, current location, and PostGIS nearby search.**
+**Phase 4 — vehicles and service requests, including server-owned request transitions.**
 
 ## Known issues
 

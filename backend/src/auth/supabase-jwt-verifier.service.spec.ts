@@ -69,4 +69,30 @@ describe('SupabaseJwtVerifier', () => {
 
     await expect(verifier.verifyAccessToken(token)).rejects.toBeInstanceOf(UnauthorizedException);
   });
+
+  it('rejects a token from another issuer', async () => {
+    const { verifier, privateKey } = createVerifier();
+    const token = sign({}, privateKey, {
+      algorithm: 'RS256',
+      audience: 'authenticated',
+      issuer: 'https://another-project.supabase.co/auth/v1',
+      keyid: 'test-key',
+      subject: userId,
+    });
+
+    await expect(verifier.verifyAccessToken(token)).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('rejects an HMAC token even when its claims look valid', async () => {
+    const { verifier } = createVerifier();
+    const token = sign({}, 'attacker-controlled-secret', {
+      algorithm: 'HS256',
+      audience: 'authenticated',
+      issuer,
+      keyid: 'test-key',
+      subject: userId,
+    });
+
+    await expect(verifier.verifyAccessToken(token)).rejects.toBeInstanceOf(UnauthorizedException);
+  });
 });

@@ -10,5 +10,6 @@ import { SupabaseJwtVerifier } from './supabase-jwt-verifier.service';
   imports: [UsersModule],
   controllers: [AuthController],
   providers: [SupabaseJwtVerifier, SupabaseAuthGuard, RolesGuard],
+  exports: [SupabaseJwtVerifier, SupabaseAuthGuard, RolesGuard],
 })
 export class AuthModule {}

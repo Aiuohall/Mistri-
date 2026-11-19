@@ -4,6 +4,7 @@ export interface EnvironmentVariables {
   NODE_ENV: 'development' | 'test' | 'production';
   PORT: number;
   CORS_ORIGINS: string;
+  ENABLE_SWAGGER: boolean;
   DATABASE_URL: string;
   DATABASE_SSL: boolean;
   SUPABASE_URL: string;
@@ -12,11 +13,40 @@ export interface EnvironmentVariables {
 
 const databaseUrlSchema = Joi.string().uri({ scheme: ['postgres', 'postgresql'] });
 const supabaseUrlSchema = Joi.string().uri({ scheme: ['http', 'https'] });
+const corsOriginsSchema = Joi.string().custom((value: string, helpers) => {
+  const origins = value.split(',').map((origin) => origin.trim());
+
+  if (!origins.length || origins.some((origin) => !origin || origin === '*')) {
+    return helpers.error('any.invalid');
+  }
+
+  for (const origin of origins) {
+    try {
+      const parsed = new URL(origin);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return helpers.error('any.invalid');
+      }
+    } catch {
+      return helpers.error('any.invalid');
+    }
+  }
+
+  return origins.join(',');
+}, 'CORS origins validation');
 
 const environmentSchema = Joi.object<EnvironmentVariables>({
   NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
   PORT: Joi.number().port().default(3000),
-  CORS_ORIGINS: Joi.string().default('http://localhost:8081,http://localhost:3001'),
+  CORS_ORIGINS: Joi.when('NODE_ENV', {
+    is: 'production',
+    then: corsOriginsSchema.required(),
+    otherwise: corsOriginsSchema.default('http://localhost:8081,http://localhost:3001'),
+  }),
+  ENABLE_SWAGGER: Joi.when('NODE_ENV', {
+    is: 'production',
+    then: Joi.boolean().default(false),
+    otherwise: Joi.boolean().default(true),
+  }),
   DATABASE_URL: Joi.when('NODE_ENV', {
     is: 'production',
     then: databaseUrlSchema.required(),
