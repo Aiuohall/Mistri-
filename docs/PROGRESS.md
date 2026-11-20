@@ -2,7 +2,7 @@
 
 ## Current phase
 
-**Phase 3 — completed locally: mechanic profiles, availability, locations, and nearby search**
+**Phase 4 — completed locally: customer vehicles and privacy-aware service requests**
 
 ### Completed
 
@@ -56,9 +56,25 @@
 - Added unit coverage for profile creation, presence and location privacy, location-update
   constraints, and nearby result mapping.
 
+### Phase 4 completed locally
+
+- Added customer-owned vehicles with validated create, list, read, and update endpoints.
+- Added vehicle and service-request migrations, including a geospatial pickup point and indexes
+  for customer, mechanic, and open-request lookup patterns.
+- Added protected customer request creation and listing; requests may only use a vehicle owned by
+  the signed-in customer.
+- Added an atomic online-mechanic acceptance flow and server-owned mechanic transitions:
+  `open → assigned → en_route → arrived → in_progress → completed`.
+- Added customer-only cancellation while a request is still open and cash-payment confirmation
+  after completion (`completed → paid`).
+- Kept pickup coordinates and vehicle registration details visible only to the request customer
+  and assigned mechanic. Mechanics browsing open work receive a privacy-safe summary.
+- Added unit coverage for vehicle ownership, request ownership, online acceptance, lifecycle
+  transitions, cash payment confirmation, and pickup-detail privacy.
+
 ## Next phase
 
-**Phase 4 — vehicles and service requests, including server-owned request transitions.**
+**Phase 5 — mobile app foundation and customer request flow.**
 
 ## Known issues
 

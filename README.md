@@ -11,7 +11,7 @@ mechanics and garages when their vehicles break down.
 - `docker/` — local development database initialization files.
 - `docs/` — product decisions and delivery progress.
 
-## Phase 1 quick start
+## Phase 1–4 quick start
 
 1. Copy the development environment templates:
 
@@ -41,6 +41,28 @@ mechanics and garages when their vehicles break down.
 
 5. Open `http://localhost:3000/health`. API documentation is at
    `http://localhost:3000/docs`.
+
+Run the versioned database migrations before starting the API:
+
+```powershell
+npm run db:migrate --workspace=backend
+```
+
+## Delivered through Phase 4
+
+- **Phase 1:** NestJS monorepo, Postgres/PostGIS development database, API health check,
+  Swagger documentation, and project tooling.
+- **Phase 2:** Supabase JWT authentication, customer/mechanic/admin roles, protected
+  profile endpoint, and user database migration. See [Supabase setup](docs/SUPABASE_SETUP.md)
+  to enable sign-in.
+- **Phase 3:** Mechanic profiles, online/offline presence, privacy-aware location updates,
+  and PostGIS nearby-mechanic search.
+- **Phase 4:** Customer vehicle management and service requests with ownership checks,
+  privacy-aware pickup details, atomic mechanic acceptance, server-controlled job
+  progression, customer cancellation while open, and cash-payment confirmation.
+
+The mobile UI and production Supabase configuration are still separate setup steps; see
+[delivery progress](docs/PROGRESS.md) for current status.
 
 See [docs/PROJECT.md](docs/PROJECT.md) for the product decisions and
 [docs/PROGRESS.md](docs/PROGRESS.md) for delivery status.

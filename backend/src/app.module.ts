@@ -7,8 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import type { EnvironmentVariables } from './config/environment.validation';
 import { HealthController } from './health/health.controller';
 import { MechanicsModule } from './mechanics/mechanics.module';
+import { ServiceRequestsModule } from './service-requests/service-requests.module';
 import { validateEnvironment } from './config/environment.validation';
 import { UsersModule } from './users/users.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AuthModule,
     MechanicsModule,
+    VehiclesModule,
+    ServiceRequestsModule,
   ],
   controllers: [HealthController],
 })
