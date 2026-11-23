@@ -1,6 +1,6 @@
 # Phase 5 task list
 
-## Task 1: Create the Expo mobile workspace
+## Task 1: Create the Expo mobile workspace — completed
 
 **Description:** Establish the TypeScript Expo SDK 58 workspace, Expo Router entry
 configuration, lint/test/typecheck/build scripts, and ignored mobile environment
@@ -8,14 +8,14 @@ template.
 
 **Acceptance criteria:**
 
-- [ ] `mobile` is a valid npm workspace with Expo Router and TypeScript configured.
-- [ ] No `.env` or credential is tracked; `.env.example` documents public variables.
-- [ ] Lint, test, typecheck, and web-export/build commands are defined.
+- [x] `mobile` is a valid npm workspace with Expo Router and TypeScript configured.
+- [x] No `.env` or credential is tracked; `.env.example` documents public variables.
+- [x] Lint, test, typecheck, and web-export/build commands are defined.
 
 **Verification:**
 
-- [ ] Focused workspace checks pass.
-- [ ] The app starts without configuration secrets.
+- [x] Focused workspace checks pass.
+- [x] The app starts without configuration secrets.
 
 **Dependencies:** None
 

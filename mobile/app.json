@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Mistri",
+    "slug": "mistri",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "mistri",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router", "expo-status-bar"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
