@@ -1,5 +1,9 @@
 # Mistri mobile app
 
+Phase 7 adds live job refresh, opt-in push, private job chat, and reviews.
+For provider setup and the two-device verification checklist, see
+[Phase 7 job engagement](../docs/PHASE_7_SPEC.md).
+
 For a standalone Android build, set `GOOGLE_MAPS_API_KEY` in the build environment.
 Restrict the key to Maps SDK for Android and the app's package name and signing
 certificate. The key is embedded in the Android binary. See the

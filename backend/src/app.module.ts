@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import type { EnvironmentVariables } from './config/environment.validation';
 import { HealthController } from './health/health.controller';
+import { EngagementModule } from './job-engagement/engagement.module';
 import { MechanicsModule } from './mechanics/mechanics.module';
 import { ServiceRequestsModule } from './service-requests/service-requests.module';
 import { validateEnvironment } from './config/environment.validation';
@@ -34,6 +35,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
     MechanicsModule,
     VehiclesModule,
     ServiceRequestsModule,
+    EngagementModule,
   ],
   controllers: [HealthController],
 })

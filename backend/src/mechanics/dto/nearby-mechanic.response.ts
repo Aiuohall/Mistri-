@@ -18,4 +18,10 @@ export class NearbyMechanicResponse {
 
   @ApiProperty({ format: 'date-time' })
   locationUpdatedAt!: string;
+
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  averageRating?: number | null;
+
+  @ApiPropertyOptional()
+  reviewCount?: number;
 }

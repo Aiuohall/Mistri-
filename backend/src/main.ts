@@ -8,6 +8,7 @@ import type { EnvironmentVariables } from './config/environment.validation';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  app.enableShutdownHooks();
   const config = app.get(ConfigService<EnvironmentVariables, true>);
   app.getHttpAdapter().getInstance().disable('x-powered-by');
   const allowedOrigins = config

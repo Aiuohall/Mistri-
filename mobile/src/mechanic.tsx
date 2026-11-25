@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import { ApiError, isAvailableJob, isJob, isMechanicProfile, readList } from './api';
 import type {
@@ -10,6 +10,8 @@ import type {
   createApi,
 } from './api';
 import { MapProvider } from './map/map-provider';
+import { JobConversation } from './job-engagement';
+import { useJobUpdate } from './job-updates';
 import {
   isMechanicBackgroundLocationRunning,
   publishCurrentMechanicLocation,
@@ -124,6 +126,28 @@ export function Mechanic({
       active = false;
     };
   }, [api]);
+  const updateAttempt = useRef(0);
+  useEffect(
+    () => () => {
+      updateAttempt.current += 1;
+    },
+    [api],
+  );
+  useJobUpdate(({ jobId, open }) => {
+    const current = ++updateAttempt.current;
+    void api('/service-requests/assigned/me')
+      .then((result) => {
+        if (current !== updateAttempt.current) return;
+        const updated = readList(result, isJob);
+        setAssignedJobs(updated);
+        if (open && jobId && updated.some((job) => job.id === jobId)) {
+          setTab('assigned');
+          setDetail(jobId);
+          setConfirm(null);
+        }
+      })
+      .catch(() => undefined);
+  });
 
   async function run(work: () => Promise<void>) {
     if (busy) return;
@@ -381,6 +405,7 @@ export function Mechanic({
                       {j.latitude.toFixed(5)}, {j.longitude.toFixed(5)}
                     </Text>
                     {j.vehicle.registrationNumber && <Text>{j.vehicle.registrationNumber}</Text>}
+                    <JobConversation key={j.id} job={j} api={api} userId={userId} />
                     <MapProvider
                       center={{ latitude: j.latitude, longitude: j.longitude }}
                       pins={[

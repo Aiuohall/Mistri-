@@ -61,6 +61,8 @@ export type NearbyMechanic = {
   serviceTypes: string[];
   distanceMeters: number;
   locationUpdatedAt: string;
+  averageRating?: number | null;
+  reviewCount?: number;
 };
 
 export type LocationUpdateResult = {
@@ -181,7 +183,10 @@ export function isNearbyMechanic(value: unknown): value is NearbyMechanic {
     typeof m.distanceMeters === 'number' &&
     Number.isFinite(m.distanceMeters) &&
     m.distanceMeters >= 0 &&
-    typeof m.locationUpdatedAt === 'string'
+    typeof m.locationUpdatedAt === 'string' &&
+    (m.averageRating == null ||
+      (typeof m.averageRating === 'number' && m.averageRating >= 1 && m.averageRating <= 5)) &&
+    (m.reviewCount === undefined || (Number.isSafeInteger(m.reviewCount) && m.reviewCount >= 0))
   );
 }
 
