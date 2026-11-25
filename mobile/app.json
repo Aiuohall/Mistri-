@@ -21,13 +21,13 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow Mistri to use your current location for the service request you send.",
-          "locationAlwaysAndWhenInUsePermission": false,
-          "locationAlwaysPermission": false,
+          "locationWhenInUsePermission": "Allow Mistri to use your current location for nearby discovery and service requests.",
+          "locationAlwaysAndWhenInUsePermission": "Allow Mistri to share your location while you are online as a mechanic, including in the background.",
+          "locationAlwaysPermission": "Allow Mistri to share your location while you are online as a mechanic.",
           "motionUsagePermission": false,
-          "isIosBackgroundLocationEnabled": false,
-          "isAndroidBackgroundLocationEnabled": false,
-          "isAndroidForegroundServiceEnabled": false
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ]
     ],

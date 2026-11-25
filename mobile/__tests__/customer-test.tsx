@@ -1,15 +1,23 @@
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import * as Location from 'expo-location';
+import { Text } from 'react-native';
 import { Customer } from '../src/customer';
 import { AppLocaleProvider } from '../src/i18n/app-locale';
 import { createApi, ApiError, readList, isJob } from '../src/api';
+import { MapProvider } from '../src/map/map-provider';
 
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
   Accuracy: { Balanced: 3 },
 }));
-beforeEach(() => jest.clearAllMocks());
+jest.mock('../src/map/map-provider', () => ({
+  MapProvider: jest.fn(() => null),
+}));
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.mocked(MapProvider).mockImplementation(({ title }) => <Text>{title}</Text>);
+});
 
 const vehicle = { id: 'vehicle-1', label: 'Family car', type: 'car' };
 function customerApi() {
@@ -242,4 +250,46 @@ it('expires the customer session when loading returns unauthorized', async () =>
 });
 it('rejects malformed request lists before rendering', () => {
   expect(() => readList([{ status: 'unknown' }], isJob)).toThrow('Invalid server response');
+});
+
+it('discovers nearby online mechanics with map view and privacy-safe distance info', async () => {
+  jest
+    .mocked(Location.requestForegroundPermissionsAsync)
+    .mockResolvedValue({ granted: true } as Location.LocationPermissionResponse);
+  jest.mocked(Location.getCurrentPositionAsync).mockResolvedValue({
+    coords: { latitude: 23.7525, longitude: 90.3742 },
+  } as Location.LocationObject);
+  const api = jest.fn(async (path: string) => {
+    if (path === '/vehicles') return [vehicle];
+    if (path === '/service-requests/mine') return [];
+    if (path.startsWith('/mechanics/nearby?')) {
+      return [
+        {
+          userId: 'm1',
+          displayName: 'Rahim Auto Care',
+          bio: 'Dhaka roadside help',
+          serviceTypes: ['car', 'motorcycle'],
+          distanceMeters: 420,
+          locationUpdatedAt: '2026-11-25T10:00:00.000Z',
+        },
+      ];
+    }
+    return [];
+  });
+
+  const ui = await render(
+    <AppLocaleProvider initialLanguage="en">
+      <Customer api={api} expired={jest.fn()} />
+    </AppLocaleProvider>,
+  );
+  await waitFor(() => expect(ui.getByText('No requests yet.')).toBeOnTheScreen());
+  await fireEvent.press(ui.getByRole('button', { name: 'Nearby mechanics' }));
+  await fireEvent.press(ui.getByRole('button', { name: 'Find nearby mechanics' }));
+
+  await waitFor(() => expect(ui.getByText('Rahim Auto Care')).toBeOnTheScreen());
+  expect(ui.getByText('Search area around you')).toBeOnTheScreen();
+  expect(ui.getByText('420 m away')).toBeOnTheScreen();
+  expect(api).toHaveBeenCalledWith(
+    '/mechanics/nearby?latitude=23.7525&longitude=90.3742&radiusMeters=5000',
+  );
 });

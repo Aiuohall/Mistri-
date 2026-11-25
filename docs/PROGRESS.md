@@ -2,7 +2,7 @@
 
 ## Current phase
 
-**Phase 5 — implemented locally: mobile foundation and customer request flow.**
+**Phase 6 — implemented locally: two-sided mobile workflow, swappable map provider, and background mechanic location.**
 Live Supabase/API and native-device acceptance checks remain external setup work.
 
 ### Completed
@@ -111,9 +111,37 @@ Live Supabase/API and native-device acceptance checks remain external setup work
   on a physical device. Web export and mocked component tests cannot establish these.
 - Follow [mobile/README.md](../mobile/README.md) for setup and the device checklist.
 
+### Phase 6 delivered locally
+
+- Added 15-minute stale-location expiry to `MechanicsService.findNearby`, aligned the
+  `POST /service-requests/:requestId/cancel` Swagger summary with the open-only rule, and
+  added the local `npm run db:set-role --workspace=backend -- <email> <role>` helper for
+  controlled test role provisioning.
+- Installed SDK 58 compatible `react-native-maps` and `expo-task-manager` and enabled
+  native background location + Android foreground service in `mobile/app.json`.
+- Extended `mobile/src/api.ts` with explicit `PUT`/`PATCH` support and runtime guards for
+  mechanic profiles, nearby mechanics, location updates, and privacy-safe available jobs.
+- Added the swappable `MapProvider` (`mobile/src/map/map-provider.native.tsx` using
+  `react-native-maps` and `mobile/src/map/map-provider.tsx` web/list fallback).
+- Added customer **Nearby mechanics** discovery (`GET /mechanics/nearby`) with map search
+  area and distance-only mechanic cards.
+- Added the bilingual mechanic workflow (`mobile/src/mechanic.tsx`,
+  `mobile/src/mechanic-location.ts`): profile setup/editing, online/offline toggle,
+  foreground and background location tracking (15 s / 50 m policy; stopped before going
+  offline or signing out), available-job acceptance with `409` conflict recovery, and
+  assigned-job private pickup map + confirmed lifecycle transitions.
+- Updated `mobile/src/account.tsx` to route verified `customer` and `mechanic` accounts
+  separately while keeping `admin`/unknown roles blocked.
+- Review fixes keep assigned jobs accessible while offline, bind API calls and background
+  tracking to their initiating account, and prevent ambiguous email matches in role provisioning.
+- Local checks passed: 30 backend and 47 mobile tests, lint, formatting, mobile typecheck,
+  backend build, and mobile web export. Android map key injection was verified with a dummy
+  value. Live map rendering, background tracking, and a two-account job remain device checks.
+
 ## Next phase
 
-Finish the external Phase 5 acceptance checks, then proceed to the next product phase.
+Complete live Supabase/API and physical-device two-sided acceptance checks (Phases 5–6),
+then proceed to Phase 7 (realtime updates, push notifications, messaging, and reviews).
 
 ## Known issues
 

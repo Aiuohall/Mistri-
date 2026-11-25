@@ -108,7 +108,7 @@ export class ServiceRequestsController {
   @Post(':requestId/cancel')
   @Roles(UserRole.CUSTOMER)
   @UseGuards(RolesGuard)
-  @ApiOperation({ summary: 'Cancel an open or newly assigned service request' })
+  @ApiOperation({ summary: 'Cancel an open service request' })
   @ApiConflictResponse({ description: 'The request can no longer be cancelled.' })
   @ApiOkResponse({ type: ServiceRequestResponse })
   cancel(

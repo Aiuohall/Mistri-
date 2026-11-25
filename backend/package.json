@@ -12,7 +12,8 @@
     "test:watch": "jest --watch",
     "db:check": "ts-node src/database/check.ts",
     "db:migrate": "typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
-    "db:migrate:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts"
+    "db:migrate:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
+    "db:set-role": "ts-node src/database/set-user-role.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

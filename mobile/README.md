@@ -1,5 +1,10 @@
 # Mistri mobile app
 
+For a standalone Android build, set `GOOGLE_MAPS_API_KEY` in the build environment.
+Restrict the key to Maps SDK for Android and the app's package name and signing
+certificate. The key is embedded in the Android binary. See the
+[Expo Maps setup instructions](https://docs.expo.dev/versions/v58.0.0/sdk/map-view/).
+
 Expo SDK 58, React Native, and Expo Router customer application with English and
 Bangla interfaces. Customers can sign in with email/password, add vehicles, request
 roadside help using foreground location, view requests, cancel open requests, and
@@ -44,10 +49,19 @@ OS-protected SecureStore. Signing out clears the local session and customer stat
    vehicle registration, assigned mechanic, and available actions. Confirm a
    cancellation or cash-payment action before submitting it.
 
-Expo Router hosts one session-aware screen. Customer sections and expanded request
-details use local navigation state; deep links into individual requests are deferred.
-Request status updates use explicit refresh. No maps, background location, location
-history, push notifications, or mechanic screens are included in Phase 5.
+Expo Router hosts one session-aware screen. Verified `customer` accounts access
+requests, nearby mechanic discovery (with `react-native-maps` on native and a list/map
+fallback on web), vehicles, and request creation. Verified `mechanic` accounts access
+profile setup, online/offline availability with foreground/background location publishing
+(`expo-task-manager` + `expo-location`), available-job acceptance, and assigned-job
+lifecycle transitions. Request status updates still use explicit refresh; realtime
+Socket.IO updates, push notifications, and in-app chat arrive in Phase 7.
+
+To provision a test mechanic account locally (after the user signs in once via `/auth/me`):
+
+```powershell
+npm run db:set-role --workspace=backend -- mechanic@example.com mechanic
+```
 
 ## Verification
 

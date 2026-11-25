@@ -136,7 +136,11 @@ describe('MechanicsService', () => {
     ]);
     expect(repository.query).toHaveBeenCalledWith(
       expect.stringContaining('ST_DWithin'),
-      [90.3742, 23.7525, 5_000, 20],
+      [90.3742, 23.7525, 5_000, 15, 20],
+    );
+    expect(repository.query).toHaveBeenCalledWith(
+      expect.stringContaining('location_updated_at" >= NOW()'),
+      [90.3742, 23.7525, 5_000, 15, 20],
     );
   });
 
