@@ -2,7 +2,8 @@
 
 ## Current phase
 
-**Phase 4 — completed locally: customer vehicles and privacy-aware service requests**
+**Phase 5 — implemented locally: mobile foundation and customer request flow.**
+Live Supabase/API and native-device acceptance checks remain external setup work.
 
 ### Completed
 
@@ -72,9 +73,47 @@
 - Added unit coverage for vehicle ownership, request ownership, online acceptance, lifecycle
   transitions, cash payment confirmation, and pickup-detail privacy.
 
+### Phase 5 delivered locally
+
+- Added the Expo SDK 58 workspace with Expo Router, mobile lint/tests/typecheck,
+  production web export, and public environment-variable template.
+- Added typed English/Bangla translation keys, device-language selection, English
+  fallback, an in-app toggle, and accessible loading/error controls.
+- Added email/password sign-in and account creation behind validated public
+  configuration, native SecureStore session persistence, foreground token refresh,
+  bearer-token API requests, session expiry recovery, and customer role gating.
+  Web sessions remain in memory and require sign-in after reload.
+- Added customer vehicle listing/creation, owned-vehicle selection, service input
+  validation, explicit foreground pickup acquisition, and request submission.
+  Leaving the request form discards coordinates and invalidates pending acquisition.
+- Added request status and private expanded details, explicit refresh, and confirmed
+  cancellation/payment actions restricted to the API-supported statuses.
+- Added regression coverage for HTTP/auth boundaries, malformed responses, oversized
+  secure sessions, location races/denial, form limits, and request-detail privacy.
+- Expo native configuration introspection confirms foreground location only, without
+  background or foreground-service location permissions or unused iOS Always/motion
+  declarations.
+- The customer sections use local navigation within one Expo Router route. Request
+  deep links, Google OAuth, maps, push notifications, and mechanic UI remain deferred.
+- Final checks passed: 30 backend tests, 39 mobile tests, root lint and formatting,
+  mobile typecheck, and production web export. Isolated Edge checks confirmed the
+  English/Bangla setup flow, no console errors, and no overflow at 320px and 390px.
+- Reconciled React and React DOM to Expo-compatible version 19.3.0 and updated the
+  dependency lockfile.
+
+### Phase 5 external acceptance checks
+
+- Supply the Supabase public values and a reachable API configured for that project;
+  enable email authentication and verify account confirmation, sign-in, and sign-out.
+- Walk through vehicles, permission denial/retry, request creation, refreshed status,
+  and customer actions against the live API in English and Bangla.
+- Verify native SecureStore restoration and the actual foreground-permission prompt
+  on a physical device. Web export and mocked component tests cannot establish these.
+- Follow [mobile/README.md](../mobile/README.md) for setup and the device checklist.
+
 ## Next phase
 
-**Phase 5 — mobile app foundation and customer request flow.**
+Finish the external Phase 5 acceptance checks, then proceed to the next product phase.
 
 ## Known issues
 

@@ -48,7 +48,7 @@ Run the versioned database migrations before starting the API:
 npm run db:migrate --workspace=backend
 ```
 
-## Delivered through Phase 4
+## Delivered through Phase 5
 
 - **Phase 1:** NestJS monorepo, Postgres/PostGIS development database, API health check,
   Swagger documentation, and project tooling.
@@ -61,8 +61,12 @@ npm run db:migrate --workspace=backend
   privacy-aware pickup details, atomic mechanic acceptance, server-controlled job
   progression, customer cancellation while open, and cash-payment confirmation.
 
-The mobile UI and production Supabase configuration are still separate setup steps; see
-[delivery progress](docs/PROGRESS.md) for current status.
+- **Phase 5:** Expo customer app with English/Bangla interfaces, email session flow,
+  customer-only access, vehicles, foreground-location requests, request details,
+  cancellation, and cash-payment confirmation. See the [mobile setup](mobile/README.md).
+
+Live sign-in and device verification require Supabase provider and API configuration;
+see [delivery progress](docs/PROGRESS.md) for current status.
 
 See [docs/PROJECT.md](docs/PROJECT.md) for the product decisions and
 [docs/PROGRESS.md](docs/PROGRESS.md) for delivery status.
