@@ -18,6 +18,8 @@ const MINIMUM_LOCATION_UPDATE_DISTANCE_METERS = 50;
 const STALE_LOCATION_MAX_AGE_MINUTES = 15;
 
 interface NearbyMechanicRow {
+  average_rating?: number | null;
+  review_count?: number;
   user_id: string;
   display_name: string;
   bio: string | null;
@@ -139,9 +141,15 @@ export class MechanicsService {
           m."bio",
           m."service_types",
           ST_Distance(m."current_location", search_point."location") AS "distance_meters",
-          m."location_updated_at"
+          m."location_updated_at",
+          reviews.average_rating,
+          reviews.review_count
         FROM "mechanics" m
         CROSS JOIN search_point
+        LEFT JOIN LATERAL (
+          SELECT round(avg(rating), 1)::float8 AS average_rating, count(*)::int AS review_count
+          FROM job_reviews WHERE mechanic_id = m.user_id AND published
+        ) reviews ON true
         WHERE m."is_online" = true
           AND m."current_location" IS NOT NULL
           AND m."location_updated_at" >= NOW() - ($4 * INTERVAL '1 minute')
@@ -165,6 +173,9 @@ export class MechanicsService {
       serviceTypes: row.service_types,
       distanceMeters: Math.round(Number(row.distance_meters)),
       locationUpdatedAt: this.toIsoString(row.location_updated_at),
+      ...(row.review_count === undefined
+        ? {}
+        : { averageRating: row.average_rating ?? null, reviewCount: row.review_count }),
     }));
   }
 

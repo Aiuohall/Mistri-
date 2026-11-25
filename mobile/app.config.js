@@ -2,10 +2,14 @@ import process from 'node:process';
 
 export default ({ config }) => {
   const androidGoogleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY?.trim();
-  if (!androidGoogleMapsApiKey) return config;
+  const googleServicesFile = process.env.GOOGLE_SERVICES_FILE?.trim();
 
   return {
     ...config,
-    plugins: [...(config.plugins ?? []), ['react-native-maps', { androidGoogleMapsApiKey }]],
+    ...(googleServicesFile ? { android: { ...config.android, googleServicesFile } } : {}),
+    plugins: [
+      ...(config.plugins ?? []),
+      ...(androidGoogleMapsApiKey ? [['react-native-maps', { androidGoogleMapsApiKey }]] : []),
+    ],
   };
 };

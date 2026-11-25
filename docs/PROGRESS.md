@@ -2,7 +2,7 @@
 
 ## Current phase
 
-**Phase 6 — implemented locally: two-sided mobile workflow, swappable map provider, and background mechanic location.**
+**Phase 7 — implemented locally: live job updates, push delivery, private chat, and reviews.**
 Live Supabase/API and native-device acceptance checks remain external setup work.
 
 ### Completed
@@ -138,10 +138,21 @@ Live Supabase/API and native-device acceptance checks remain external setup work
   backend build, and mobile web export. Android map key injection was verified with a dummy
   value. Live map rendering, background tracking, and a two-account job remain device checks.
 
+### Phase 7 implemented locally
+
+- Added authenticated job invalidations and a PostgreSQL outbox. Job state and its
+  event commit together. The app reloads authorized state on events and reconnect.
+- Added opt-in Expo notifications with queued retries and ticket/receipt handling.
+- Added private, retry-safe chat with reporting and read-only completed conversations.
+- Added one review per eligible customer job and rating aggregates in mechanic discovery.
+- Verified 38 backend tests, including five on an isolated PostgreSQL/PostGIS database,
+  and 50 mobile tests. Lint, formatting, mobile typecheck, backend build, and web export passed.
+- See [the Phase 7 notes](PHASE_7_SPEC.md) for migration, credential setup, and device checks.
+
 ## Next phase
 
-Complete live Supabase/API and physical-device two-sided acceptance checks (Phases 5–6),
-then proceed to Phase 7 (realtime updates, push notifications, messaging, and reviews).
+Complete the live Supabase/API and physical-device acceptance checks for Phases 5–7,
+including live push delivery. Phase 8 introduces quoting and wallet accounting.
 
 ## Known issues
 

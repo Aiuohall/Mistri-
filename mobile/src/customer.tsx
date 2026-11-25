@@ -4,6 +4,8 @@ import * as Location from 'expo-location';
 import { ApiError, isJob, isNearbyMechanic, isVehicle, readList } from './api';
 import type { Job, NearbyMechanic, Vehicle, createApi } from './api';
 import { MapProvider } from './map/map-provider';
+import { JobConversation, JobReview } from './job-engagement';
+import { useJobUpdate } from './job-updates';
 import { Button, Field, Heading, Notice, styles, useCopy } from './ui';
 
 const NEARBY_RADIUS_METERS = 5000;
@@ -11,9 +13,11 @@ const types = ['car', 'motorcycle', 'cng', 'truck', 'other'] as const;
 export function Customer({
   api,
   expired,
+  userId,
 }: {
   api: ReturnType<typeof createApi>;
   expired: () => void;
+  userId?: string;
 }) {
   const c = useCopy();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -76,6 +80,27 @@ export function Customer({
       locationAttempt.current += 1;
     };
   }, [api]);
+  const updateAttempt = useRef(0);
+  useEffect(
+    () => () => {
+      updateAttempt.current += 1;
+    },
+    [api],
+  );
+  useJobUpdate(({ jobId, open }) => {
+    const current = ++updateAttempt.current;
+    void api('/service-requests/mine')
+      .then((result) => {
+        if (current !== updateAttempt.current) return;
+        const updated = readList(result, isJob);
+        setJobs(updated);
+        if (open && jobId && updated.some((job) => job.id === jobId)) {
+          changeTab('jobs');
+          setDetail(jobId);
+        }
+      })
+      .catch(() => undefined);
+  });
   async function run(work: () => Promise<void>) {
     if (busy) return;
     setBusy(true);
@@ -191,6 +216,11 @@ export function Customer({
           {nearby?.map((m) => (
             <View key={m.userId} style={styles.card}>
               <Text>{m.displayName}</Text>
+              {typeof m.averageRating === 'number' && typeof m.reviewCount === 'number' && (
+                <Text>
+                  {m.averageRating.toFixed(1)}/5 · {m.reviewCount} {c('engagement.rating_count')}
+                </Text>
+              )}
               {m.bio && <Text>{m.bio}</Text>}
               <Text>{m.serviceTypes.join(', ')}</Text>
               <Text>
@@ -329,6 +359,10 @@ export function Customer({
                   </Text>
                   {j.vehicle.registrationNumber && <Text>{j.vehicle.registrationNumber}</Text>}
                   {j.mechanic && <Text>{j.mechanic.displayName}</Text>}
+                  {j.mechanic && <JobConversation key={j.id} job={j} api={api} userId={userId} />}
+                  {(j.status === 'completed' || j.status === 'paid') && (
+                    <JobReview jobId={j.id} api={api} />
+                  )}
                   {(j.status === 'open' || j.status === 'completed') && (
                     <Button
                       disabled={busy}

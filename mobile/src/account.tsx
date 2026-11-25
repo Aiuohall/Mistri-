@@ -5,6 +5,14 @@ import { apiUrl, auth } from './auth';
 import { ApiError, createApi } from './api';
 import { Customer } from './customer';
 import { Mechanic } from './mechanic';
+import { JobUpdates } from './job-updates';
+import {
+  disablePush,
+  enablePush,
+  refreshPush,
+  supportsPush,
+  watchPushToken,
+} from './push-installation';
 import { stopMechanicBackgroundLocation } from './mechanic-location';
 import { Button, Field, Heading, Notice, useCopy } from './ui';
 
@@ -22,6 +30,9 @@ export function Account() {
   const [error, setError] = useState(false);
   const [sent, setSent] = useState(false);
   const [retry, setRetry] = useState(0);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushError, setPushError] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
   const api = useMemo(
     () =>
       createApi(apiUrl, async () => {
@@ -97,12 +108,54 @@ export function Account() {
       active = false;
     };
   }, [session?.user.id, api, retry]);
+  useEffect(() => {
+    setPushEnabled(false);
+    setPushError(false);
+    if (!supportsPush || !verifiedUserId || verifiedUserId !== session?.user.id) return;
+    let active = true;
+    const refresh = () => {
+      void refreshPush(api, verifiedUserId)
+        .then((enabled) => {
+          if (active) setPushEnabled(enabled);
+        })
+        .catch(() => undefined);
+    };
+    refresh();
+    const stopWatchingToken = watchPushToken(api, verifiedUserId);
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') refresh();
+    });
+    return () => {
+      active = false;
+      sub.remove();
+      stopWatchingToken();
+    };
+  }, [api, session?.user.id, verifiedUserId]);
+  async function togglePush(userId: string) {
+    setPushBusy(true);
+    setPushError(false);
+    try {
+      if (pushEnabled) {
+        await disablePush(api, userId);
+        setPushEnabled(false);
+      } else {
+        const enabled = await enablePush(api, userId);
+        setPushEnabled(enabled);
+        setPushError(!enabled);
+      }
+    } catch {
+      setPushError(true);
+    } finally {
+      setPushBusy(false);
+    }
+  }
   async function signOut() {
     setSession(null);
     setPassword('');
     setVerifiedUserId(null);
     void stopMechanicBackgroundLocation();
     try {
+      if (session) await disablePush(api, session.user.id).catch(() => undefined);
       const result = await auth?.auth.signOut({ scope: 'local' });
       if (result?.error) setError(true);
     } catch {
@@ -165,7 +218,7 @@ export function Account() {
     );
   return (
     <>
-      <Button title={c('account.sign_out')} onPress={() => void signOut()} />
+      <Button title={c('account.sign_out')} disabled={pushBusy} onPress={() => void signOut()} />
       {error && <Notice>{c('account.please_try_again')}</Notice>}
       {role === 'loading' && <Text>{c('account.checking_account')}</Text>}
       {role === 'denied' && (
@@ -177,16 +230,22 @@ export function Account() {
           <Button title={c('account.try_again')} onPress={() => setRetry((value) => value + 1)} />
         </>
       )}
-      {role === 'customer' && verifiedUserId === session.user.id && (
-        <Customer key={session.user.id} api={api} expired={() => void signOut()} />
-      )}
-      {role === 'mechanic' && verifiedUserId === session.user.id && (
-        <Mechanic
-          key={session.user.id}
-          userId={session.user.id}
-          api={api}
-          expired={() => void signOut()}
-        />
+      {verifiedUserId === session.user.id && (role === 'customer' || role === 'mechanic') && (
+        <JobUpdates key={session.user.id} token={session.access_token}>
+          {supportsPush && (
+            <Button
+              title={c(pushEnabled ? 'engagement.disable_push' : 'engagement.enable_push')}
+              disabled={pushBusy}
+              onPress={() => void togglePush(session.user.id)}
+            />
+          )}
+          {pushError && <Notice>{c('engagement.push_unavailable')}</Notice>}
+          {role === 'customer' ? (
+            <Customer userId={session.user.id} api={api} expired={() => void signOut()} />
+          ) : (
+            <Mechanic userId={session.user.id} api={api} expired={() => void signOut()} />
+          )}
+        </JobUpdates>
       )}
     </>
   );
