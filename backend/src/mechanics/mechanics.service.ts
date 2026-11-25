@@ -15,6 +15,7 @@ const DEFAULT_NEARBY_RADIUS_METERS = 5_000;
 const NEARBY_RESULTS_LIMIT = 20;
 const MINIMUM_LOCATION_UPDATE_INTERVAL_SECONDS = 15;
 const MINIMUM_LOCATION_UPDATE_DISTANCE_METERS = 50;
+const STALE_LOCATION_MAX_AGE_MINUTES = 15;
 
 interface NearbyMechanicRow {
   user_id: string;
@@ -143,14 +144,16 @@ export class MechanicsService {
         CROSS JOIN search_point
         WHERE m."is_online" = true
           AND m."current_location" IS NOT NULL
+          AND m."location_updated_at" >= NOW() - ($4 * INTERVAL '1 minute')
           AND ST_DWithin(m."current_location", search_point."location", $3)
         ORDER BY "distance_meters" ASC, m."location_updated_at" DESC
-        LIMIT $4
+        LIMIT $5
       `,
       [
         query.longitude,
         query.latitude,
         query.radiusMeters ?? DEFAULT_NEARBY_RADIUS_METERS,
+        STALE_LOCATION_MAX_AGE_MINUTES,
         NEARBY_RESULTS_LIMIT,
       ],
     );

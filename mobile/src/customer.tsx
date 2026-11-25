@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import * as Location from 'expo-location';
-import { ApiError, isJob, isVehicle, readList } from './api';
-import type { Job, Vehicle, createApi } from './api';
+import { ApiError, isJob, isNearbyMechanic, isVehicle, readList } from './api';
+import type { Job, NearbyMechanic, Vehicle, createApi } from './api';
+import { MapProvider } from './map/map-provider';
 import { Button, Field, Heading, Notice, styles, useCopy } from './ui';
 
+const NEARBY_RADIUS_METERS = 5000;
 const types = ['car', 'motorcycle', 'cng', 'truck', 'other'] as const;
 export function Customer({
   api,
@@ -16,7 +18,11 @@ export function Customer({
   const c = useCopy();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [tab, setTab] = useState<'jobs' | 'vehicle' | 'request'>('jobs');
+  const [nearby, setNearby] = useState<NearbyMechanic[] | null>(null);
+  const [nearbyPoint, setNearbyPoint] = useState<{ latitude: number; longitude: number } | null>(
+    null,
+  );
+  const [tab, setTab] = useState<'jobs' | 'nearby' | 'vehicle' | 'request'>('jobs');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
@@ -35,6 +41,8 @@ export function Customer({
   const changeTab = (next: typeof tab) => {
     locationAttempt.current += 1;
     setPoint(null);
+    setNearbyPoint(null);
+    setNearby(null);
     setLocationError(false);
     setConfirm(null);
     setTab(next);
@@ -105,14 +113,95 @@ export function Customer({
       if (attempt === locationAttempt.current) setLocationError(true);
     }
   }
+  async function searchNearby() {
+    const attempt = ++locationAttempt.current;
+    setNearbyPoint(null);
+    setLocationError(false);
+    let coords: { latitude: number; longitude: number };
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (attempt !== locationAttempt.current) return;
+      if (!permission.granted) throw new Error('Permission denied');
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      if (attempt !== locationAttempt.current) return;
+      const { latitude, longitude } = location.coords;
+      if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude) ||
+        Math.abs(latitude) > 90 ||
+        Math.abs(longitude) > 180
+      )
+        throw new Error('Invalid location');
+      coords = { latitude, longitude };
+    } catch {
+      if (attempt === locationAttempt.current) setLocationError(true);
+      return;
+    }
+    const query =
+      '/mechanics/nearby?latitude=' +
+      encodeURIComponent(String(coords.latitude)) +
+      '&longitude=' +
+      encodeURIComponent(String(coords.longitude)) +
+      '&radiusMeters=' +
+      String(NEARBY_RADIUS_METERS);
+    const results = await api(query);
+    if (attempt !== locationAttempt.current) return;
+    setNearbyPoint(coords);
+    setNearby(readList(results, isNearbyMechanic));
+  }
   return (
     <>
       <Button title={c('customer.my_requests')} onPress={() => changeTab('jobs')} />
+      <Button title={c('customer.nearby_mechanics')} onPress={() => changeTab('nearby')} />
       <Button title={c('customer.add_vehicle')} onPress={() => changeTab('vehicle')} />
       <Button title={c('customer.request_help')} onPress={() => changeTab('request')} />
       {(loading || busy) && <Text accessibilityLiveRegion="polite">{c('customer.loading')}</Text>}
       {error && <Notice>{c('customer.unable_to_save_or_load_check_your')}</Notice>}
       <Button title={c('customer.refresh')} disabled={busy} onPress={() => void run(refresh)} />
+      {tab === 'nearby' && (
+        <>
+          <Heading>{c('customer.nearby_mechanics')}</Heading>
+          <Text>{c('customer.search_nearby_prompt')}</Text>
+          <Button
+            title={c('customer.find_nearby_mechanics')}
+            disabled={busy}
+            onPress={() => void run(searchNearby)}
+          />
+          {locationError && (
+            <Notice>{c('customer.location_unavailable_enable_location_permission_and_try')}</Notice>
+          )}
+          {nearbyPoint && (
+            <MapProvider
+              center={nearbyPoint}
+              radiusMeters={NEARBY_RADIUS_METERS}
+              pins={[
+                {
+                  id: 'customer-location',
+                  coordinate: nearbyPoint,
+                  title: c('customer.your_location_pin'),
+                },
+              ]}
+              title={c('customer.nearby_map_title')}
+              attribution={c('customer.nearby_map_attribution')}
+            />
+          )}
+          {nearby && !nearby.length && <Text>{c('customer.no_nearby_mechanics')}</Text>}
+          {nearby?.map((m) => (
+            <View key={m.userId} style={styles.card}>
+              <Text>{m.displayName}</Text>
+              {m.bio && <Text>{m.bio}</Text>}
+              <Text>{m.serviceTypes.join(', ')}</Text>
+              <Text>
+                {m.distanceMeters >= 1000
+                  ? `${(m.distanceMeters / 1000).toFixed(1)} ${c('customer.distance_km')}`
+                  : `${m.distanceMeters} ${c('customer.distance_meters')}`}
+              </Text>
+            </View>
+          ))}
+        </>
+      )}
       {tab === 'vehicle' && (
         <>
           <Heading>{c('customer.your_vehicles')}</Heading>

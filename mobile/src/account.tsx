@@ -4,13 +4,17 @@ import { AppState, Text } from 'react-native';
 import { apiUrl, auth } from './auth';
 import { ApiError, createApi } from './api';
 import { Customer } from './customer';
+import { Mechanic } from './mechanic';
+import { stopMechanicBackgroundLocation } from './mechanic-location';
 import { Button, Field, Heading, Notice, useCopy } from './ui';
 
 export function Account() {
   const c = useCopy();
   const [session, setSession] = useState<Session | null>(null);
   const [restoring, setRestoring] = useState(true);
-  const [role, setRole] = useState<'loading' | 'customer' | 'denied' | 'error'>('loading');
+  const [role, setRole] = useState<'loading' | 'customer' | 'mechanic' | 'denied' | 'error'>(
+    'loading',
+  );
   const [verifiedUserId, setVerifiedUserId] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +24,10 @@ export function Account() {
   const [retry, setRetry] = useState(0);
   const api = useMemo(
     () =>
-      createApi(apiUrl, async () => (await auth?.auth.getSession())?.data.session?.access_token),
+      createApi(apiUrl, async () => {
+        const current = (await auth?.auth.getSession())?.data.session;
+        return current && current.user.id === session?.user.id ? current.access_token : undefined;
+      }),
     [session?.user.id],
   );
   useEffect(() => {
@@ -68,13 +75,14 @@ export function Account() {
       api('/auth/me')
         .then((profile) => {
           if (active) {
-            const customer =
-              profile &&
-              typeof profile === 'object' &&
-              'role' in profile &&
-              profile.role === 'customer';
-            setRole(customer ? 'customer' : 'denied');
-            if (customer) setVerifiedUserId(session.user.id);
+            const nextRole =
+              profile && typeof profile === 'object' && 'role' in profile ? profile.role : null;
+            if (nextRole === 'customer' || nextRole === 'mechanic') {
+              setRole(nextRole);
+              setVerifiedUserId(session.user.id);
+            } else {
+              setRole('denied');
+            }
           }
         })
         .catch((error) => {
@@ -93,6 +101,7 @@ export function Account() {
     setSession(null);
     setPassword('');
     setVerifiedUserId(null);
+    void stopMechanicBackgroundLocation();
     try {
       const result = await auth?.auth.signOut({ scope: 'local' });
       if (result?.error) setError(true);
@@ -170,6 +179,14 @@ export function Account() {
       )}
       {role === 'customer' && verifiedUserId === session.user.id && (
         <Customer key={session.user.id} api={api} expired={() => void signOut()} />
+      )}
+      {role === 'mechanic' && verifiedUserId === session.user.id && (
+        <Mechanic
+          key={session.user.id}
+          userId={session.user.id}
+          api={api}
+          expired={() => void signOut()}
+        />
       )}
     </>
   );

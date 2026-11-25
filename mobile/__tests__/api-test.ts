@@ -1,4 +1,14 @@
-import { ApiError, createApi, isJob, isVehicle, readList } from '../src/api';
+import {
+  ApiError,
+  createApi,
+  isAvailableJob,
+  isJob,
+  isLocationUpdateResult,
+  isMechanicProfile,
+  isNearbyMechanic,
+  isVehicle,
+  readList,
+} from '../src/api';
 
 describe('API transport', () => {
   const fetchMock = jest.fn();
@@ -33,6 +43,15 @@ describe('API transport', () => {
       createApi('https://api.example.com', async () => undefined)('/vehicles'),
     ).rejects.toMatchObject({ status: 401 });
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('supports explicit PUT and PATCH methods for mechanic mutations', async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: async () => ({ isOnline: true }) });
+    const api = createApi('https://api.example.com', async () => 'token');
+    await api('/mechanics/me/profile', { displayName: 'Rahim', serviceTypes: ['car'] }, 'PUT');
+    await api('/mechanics/me/availability', { isOnline: true }, 'PATCH');
+    expect(fetchMock.mock.calls[0][1].method).toBe('PUT');
+    expect(fetchMock.mock.calls[1][1].method).toBe('PATCH');
   });
 
   it.each([401, 403, 409, 500])('preserves HTTP %s for recoverable UI states', async (status) => {
@@ -73,5 +92,45 @@ describe('API response validation', () => {
 
   it('rejects a malformed response instead of partially rendering it', () => {
     expect(() => readList([vehicle, null], isVehicle)).toThrow('Invalid server response');
+  });
+
+  it('validates mechanic profiles, nearby mechanics, location updates, and privacy-safe available jobs', () => {
+    const profile = {
+      userId: 'm1',
+      displayName: 'Rahim Auto Care',
+      bio: 'Roadside specialist',
+      serviceTypes: ['car'],
+      isOnline: true,
+      locationUpdatedAt: '2026-11-25T10:00:00.000Z',
+    };
+    const nearby = {
+      userId: 'm1',
+      displayName: 'Rahim Auto Care',
+      bio: null,
+      serviceTypes: ['car', 'motorcycle'],
+      distanceMeters: 420,
+      locationUpdatedAt: '2026-11-25T10:00:00.000Z',
+    };
+    const available = {
+      id: 'r1',
+      status: 'open',
+      serviceType: 'flat_tire',
+      description: 'Front tire flat',
+      vehicle: { label: 'Family car', type: 'car' },
+      createdAt: '2026-11-25T10:00:00.000Z',
+    };
+
+    expect(isMechanicProfile(profile)).toBe(true);
+    expect(isNearbyMechanic(nearby)).toBe(true);
+    expect(isNearbyMechanic({ ...nearby, distanceMeters: -5 })).toBe(false);
+    expect(isLocationUpdateResult({ locationUpdatedAt: '2026-11-25T10:00:00.000Z' })).toBe(true);
+    expect(isAvailableJob(available)).toBe(true);
+    expect(isAvailableJob({ ...available, latitude: 23.75 })).toBe(false);
+    expect(
+      isAvailableJob({
+        ...available,
+        vehicle: { ...available.vehicle, registrationNumber: 'DHAKA-12' },
+      }),
+    ).toBe(false);
   });
 });
