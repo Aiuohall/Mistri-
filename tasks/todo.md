@@ -24,21 +24,21 @@ template.
 
 **Estimated scope:** Medium
 
-## Task 2: Add localization and shared accessible UI primitives
+## Task 2: Add localization and shared accessible UI primitives — completed locally
 
 **Description:** Add English/Bangla translations, language selection, and focused
 layout/text/button/form-status primitives used by the Phase 5 screens.
 
 **Acceptance criteria:**
 
-- [ ] Customer-facing strings use translation keys.
-- [ ] The app falls back safely to English.
-- [ ] Shared states expose loading and error text accessibly.
+- [x] Customer-facing strings use translation keys.
+- [x] The app falls back safely to English.
+- [x] Shared states expose loading and error text accessibly.
 
 **Verification:**
 
-- [ ] Localization tests cover English, Bangla, and fallback behavior.
-- [ ] Lint and typecheck pass.
+- [x] Localization tests cover English, Bangla, and fallback behavior.
+- [x] Lint and typecheck pass.
 
 **Dependencies:** Task 1
 
@@ -47,7 +47,7 @@ layout/text/button/form-status primitives used by the Phase 5 screens.
 
 **Estimated scope:** Medium
 
-## Task 3: Add session-aware API client and app shell
+## Task 3: Add session-aware API client and app shell — completed locally
 
 **Description:** Implement configuration validation, Supabase session boundary,
 authorized API requests, API-error mapping, and navigation states for unconfigured,
@@ -55,14 +55,14 @@ signed-out, and customer sessions.
 
 **Acceptance criteria:**
 
-- [ ] Every protected request uses a bearer token from the session boundary.
-- [ ] Missing configuration and unauthorized API responses are recoverable states.
-- [ ] A non-customer profile cannot enter customer routes.
+- [x] Every protected request uses a bearer token from the session boundary.
+- [x] Missing configuration and unauthorized API responses are recoverable states.
+- [x] A non-customer profile cannot enter customer routes.
 
 **Verification:**
 
-- [ ] API-client tests cover headers, error mapping, and unauthorized handling.
-- [ ] Typecheck, lint, and production export/build pass.
+- [x] API-client tests cover headers, error mapping, and unauthorized handling.
+- [x] Typecheck, lint, and production export/build pass.
 
 **Dependencies:** Tasks 1–2
 
@@ -73,24 +73,24 @@ signed-out, and customer sessions.
 
 ## Checkpoint: Foundation
 
-- [ ] Mobile lint, tests, typecheck, and build/export pass.
-- [ ] Configuration, signed-out, and customer-shell states are manually navigable.
+- [x] Mobile lint, tests, typecheck, and build/export pass.
+- [x] Configuration state is browser-verified; signed-out and customer-role states have component coverage.
 
-## Task 4: Deliver customer vehicles
+## Task 4: Deliver customer vehicles — completed locally
 
 **Description:** Build the vehicle list and add-vehicle flow using the protected
 `GET /vehicles` and `POST /vehicles` contract.
 
 **Acceptance criteria:**
 
-- [ ] Customer can see loading, empty, error, and populated vehicle states.
-- [ ] Vehicle input is validated before submission.
-- [ ] A successful creation updates the list without exposing it to other users.
+- [x] Customer can see loading, empty, error, and populated vehicle states.
+- [x] Vehicle input is validated before submission.
+- [x] A successful creation updates the list without exposing it to other users.
 
 **Verification:**
 
-- [ ] Tests cover validation, remote states, and successful list refresh.
-- [ ] Typecheck and lint pass.
+- [x] Tests cover validation, remote states, and successful list refresh.
+- [x] Typecheck and lint pass.
 
 **Dependencies:** Task 3
 
@@ -99,23 +99,23 @@ vehicle tests
 
 **Estimated scope:** Medium
 
-## Task 5: Deliver service-request creation
+## Task 5: Deliver service-request creation — implemented; device verification pending
 
 **Description:** Build vehicle selection, service-description validation, explicit
 foreground-location acquisition, and `POST /service-requests` submission.
 
 **Acceptance criteria:**
 
-- [ ] The request cannot submit without a selected owned vehicle, valid description,
+- [x] The request cannot submit without a selected owned vehicle, valid description,
       and a successful foreground location reading.
-- [ ] Permission denial/unavailable location has a clear recovery state.
-- [ ] Coordinates are used only for the submitted request and are not persisted by
+- [x] Permission denial/unavailable location has a clear recovery state.
+- [x] Coordinates are used only for the submitted request and are not persisted by
       the client.
 
 **Verification:**
 
-- [ ] Tests cover payload construction and denial/error states.
-- [ ] Manual device check verifies the foreground-permission prompt.
+- [x] Tests cover payload construction and denial/error states.
+- [ ] Manual device check verifies the foreground-permission prompt (external).
 
 **Dependencies:** Tasks 3–4
 
@@ -124,23 +124,23 @@ foreground-location acquisition, and `POST /service-requests` submission.
 
 **Estimated scope:** Medium
 
-## Task 6: Deliver request status and customer actions
+## Task 6: Deliver request status and customer actions — completed locally
 
 **Description:** Build the current/customer request list and detail views, including
 only API-permitted cancellation and cash-payment confirmation actions.
 
 **Acceptance criteria:**
 
-- [ ] Status labels and assigned-mechanic details render from `GET /service-requests/mine`.
-- [ ] Cancel/confirm-payment actions only render for permitted statuses and refresh
+- [x] Status labels and assigned-mechanic details render from `GET /service-requests/mine`.
+- [x] Cancel/confirm-payment actions only render for permitted statuses and refresh
       the displayed request after success.
-- [ ] Exact pickup details and vehicle registration remain confined to the owning
+- [x] Exact pickup details and vehicle registration remain confined to the owning
       customer's request detail screen.
 
 **Verification:**
 
-- [ ] Tests cover status-action mapping, error handling, and privacy-safe summaries.
-- [ ] Typecheck, lint, test, and production export/build pass.
+- [x] Tests cover status-action mapping, error handling, and privacy-safe summaries.
+- [x] Typecheck, lint, test, and production export/build pass.
 
 **Dependencies:** Task 3
 
@@ -151,7 +151,15 @@ only API-permitted cancellation and cash-payment confirmation actions.
 
 ## Checkpoint: Complete
 
-- [ ] All Phase 5 acceptance criteria are met.
-- [ ] Root lint, test, and formatting checks pass.
-- [ ] Manual flow is verified with live Supabase/API configuration when available.
-- [ ] `docs/PROGRESS.md` is updated with completed work and remaining external setup.
+- [x] All locally verifiable Phase 5 implementation criteria are met.
+- [x] Root lint, test, and formatting checks pass.
+- [ ] Manual flow is verified with live Supabase/API configuration (external).
+- [x] `docs/PROGRESS.md` is updated with completed work and remaining external setup.
+
+## Verification record
+
+- Root tests: 30 backend and 39 mobile tests pass; root lint and formatting pass.
+- Mobile typecheck and production web export pass.
+- Native configuration introspection confirms foreground-only location permissions.
+- Isolated Edge verification: English/Bangla setup state, working toggle, no console errors or horizontal overflow at 320px and 390px.
+- Live API and physical-device checks remain unchecked above; see mobile/README.md.

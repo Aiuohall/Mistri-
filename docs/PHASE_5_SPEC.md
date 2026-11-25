@@ -1,8 +1,10 @@
-# Draft specification: Phase 5 mobile foundation and customer request flow
+# Specification: Phase 5 mobile foundation and customer request flow
 
 ## Status
 
-**Draft — requires approval before implementation.**
+**Implementation authorized by the request to complete Phase 5.** Local code and
+automated verification are delivered; live Supabase and native device verification
+remain dependent on external configuration.
 
 ## Objective
 
@@ -21,8 +23,9 @@ details or vehicle registrations.
   Expo.
 - Supabase session integration using public Expo environment variables. The app sends
   the session access token to the existing NestJS API as a bearer token.
-- Customer routes for sign-in/session restoration, vehicle list and creation, service
-  request creation, and request list/detail status.
+- A session-aware Expo Router screen for sign-in/session restoration, with local
+  customer navigation for vehicle list/creation, request creation, and request
+  list/detail status. Individual request deep links are deferred.
 - Foreground-only current-location permission and coordinate acquisition when the
   customer creates a request. No background location collection.
 - English and Bangla user-visible strings, with English fallback and an in-app
@@ -133,12 +136,13 @@ The exact scripts will be added with the mobile workspace.
   and error states.
 - No map key, Firebase credential, Supabase secret, or location history is added.
 
-## Open question
+## Sign-in scope
 
-The Supabase project and providers are not yet configured. Choose whether Phase 5
-should include live Email/Google sign-in now (requiring those values and redirect
-configuration) or should deliver the app/session-aware API flow first and connect the
-sign-in screen once that external configuration is available.
+Email/password sign-in and account creation are implemented behind validated public
+configuration. Native sessions use SecureStore; web sessions remain in memory and
+require sign-in after a page reload. Google OAuth and provider/redirect activation
+remain external follow-up work. Live end-to-end checks require the configured
+Supabase project and matching backend JWT configuration.
 
 ## Sources
 
