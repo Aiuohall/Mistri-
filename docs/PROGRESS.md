@@ -148,6 +148,12 @@ Live Supabase/API and native-device acceptance checks remain external setup work
 - Verified 38 backend tests, including five on an isolated PostgreSQL/PostGIS database,
   and 50 mobile tests. Lint, formatting, mobile typecheck, backend build, and web export passed.
 - See [the Phase 7 notes](PHASE_7_SPEC.md) for migration, credential setup, and device checks.
+- On 2026-11-28 the local verification passed again: 33 backend unit tests, five
+  PostGIS integration tests, 50 mobile tests, lint, formatting, mobile typecheck,
+  backend build, and web export. The development database had no pending migrations.
+  Supabase Auth settings and the API health endpoint on the development machine's
+  LAN address both returned HTTP 200. The signed-in two-device job walkthrough,
+  including background push delivery and opening the job from a notification, remains pending.
 
 ## Next phase
 

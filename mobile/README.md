@@ -58,8 +58,9 @@ requests, nearby mechanic discovery (with `react-native-maps` on native and a li
 fallback on web), vehicles, and request creation. Verified `mechanic` accounts access
 profile setup, online/offline availability with foreground/background location publishing
 (`expo-task-manager` + `expo-location`), available-job acceptance, and assigned-job
-lifecycle transitions. Request status updates still use explicit refresh; realtime
-Socket.IO updates, push notifications, and in-app chat arrive in Phase 7.
+lifecycle transitions. Both participants receive live job updates and can chat on
+assigned jobs. After completion, the conversation becomes read-only and the
+customer can review the mechanic. Device push notifications are opt-in.
 
 To provision a test mechanic account locally (after the user signs in once via `/auth/me`):
 
