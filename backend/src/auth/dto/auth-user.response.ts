@@ -3,6 +3,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '../../users/user-role.enum';
 
 export class AuthUserResponse {
+  @ApiProperty()
+  walletSandbox!: boolean;
+
   @ApiProperty({ format: 'uuid' })
   id!: string;
 

@@ -9,6 +9,7 @@ import { SupabaseAuthGuard } from './supabase-auth.guard';
 import { AuthUserResponse } from './dto/auth-user.response';
 import { UserRole } from '../users/user-role.enum';
 import { UsersService } from '../users/users.service';
+import { sandboxRate } from '../settlement/sandbox';
 
 @ApiTags('auth')
 @ApiBearerAuth()
@@ -21,7 +22,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Verify a Supabase access token and return the local user profile' })
   @ApiOkResponse({ type: AuthUserResponse })
   async getMe(@CurrentAuthUser() identity: AuthenticatedIdentity): Promise<AuthUserResponse> {
-    return this.usersService.getOrCreateFromIdentity(identity);
+    const user = await this.usersService.getOrCreateFromIdentity(identity);
+    return { ...user, walletSandbox: user.role === UserRole.MECHANIC && sandboxRate() !== null };
   }
 
   @Get('admin/check')

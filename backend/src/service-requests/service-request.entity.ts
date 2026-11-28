@@ -25,6 +25,9 @@ export class ServiceRequest {
   @Column({ name: 'mechanic_id', type: 'uuid', nullable: true })
   mechanicId!: string | null;
 
+  @Column({ name: 'commission_bps', type: 'smallint', nullable: true })
+  commissionBps!: number | null;
+
   @Column({ name: 'service_type', type: 'varchar', length: 50 })
   serviceType!: string;
 

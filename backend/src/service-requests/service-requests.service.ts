@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 
 import { MechanicProfile } from '../mechanics/mechanic-profile.entity';
+import { sandboxRate } from '../settlement/sandbox';
 import { Vehicle } from '../vehicles/vehicle.entity';
 import type { VehicleType } from '../vehicles/vehicle-type.enum';
 import type { CreateServiceRequestDto } from './dto/create-service-request.dto';
@@ -23,6 +25,7 @@ import { ServiceRequestStatus } from './service-request-status.enum';
 const REQUESTS_PAGE_SIZE = 50;
 
 interface ServiceRequestRow {
+  commission_bps: number | null;
   id: string;
   vehicle_id: string;
   mechanic_id: string | null;
@@ -78,6 +81,7 @@ const REQUEST_SELECT = `
   SELECT
     sr."id",
     sr."vehicle_id",
+    sr."commission_bps",
     sr."mechanic_id",
     sr."status",
     sr."service_type",
@@ -123,6 +127,7 @@ export class ServiceRequestsService {
       customerId,
       vehicleId: vehicle.id,
       mechanicId: null,
+      commissionBps: sandboxRate(),
       serviceType: dto.serviceType,
       description: dto.description,
       location: {
@@ -204,7 +209,7 @@ export class ServiceRequestsService {
 
     const updated = await this.serviceRequestsRepository.query<UpdatedRequestRow[]>(
       `
-        UPDATE "service_requests"
+        WITH changed AS (UPDATE "service_requests"
         SET
           "mechanic_id" = $1,
           "status" = 'assigned',
@@ -213,7 +218,7 @@ export class ServiceRequestsService {
         WHERE "id" = $2
           AND "status" = 'open'
           AND "mechanic_id" IS NULL
-        RETURNING "id"
+        RETURNING "id") SELECT id FROM changed
       `,
       [mechanicId, requestId],
     );
@@ -233,9 +238,10 @@ export class ServiceRequestsService {
     const transition = MECHANIC_TRANSITIONS[dto.action];
     const completedAtUpdate =
       transition.to === ServiceRequestStatus.COMPLETED ? 'NOW()' : '"completed_at"';
-    const updated = await this.serviceRequestsRepository.query<UpdatedRequestRow[]>(
-      `
-        UPDATE "service_requests"
+    const updated = await this.serviceRequestsRepository
+      .query<UpdatedRequestRow[]>(
+        `
+        WITH changed AS (UPDATE "service_requests"
         SET
           "status" = $1,
           "completed_at" = ${completedAtUpdate},
@@ -243,12 +249,28 @@ export class ServiceRequestsService {
         WHERE "id" = $2
           AND "mechanic_id" = $3
           AND "status" = $4
-        RETURNING "id"
+          AND ("commission_bps" IS NULL OR $5::boolean)
+        RETURNING "id") SELECT id FROM changed
       `,
-      [transition.to, requestId, mechanicId, transition.from],
-    );
+        [transition.to, requestId, mechanicId, transition.from, sandboxRate() !== null],
+      )
+      .catch((error: unknown) => {
+        if (error instanceof Error && 'code' in error && error.code === 'P8001') {
+          throw new ConflictException(error.message);
+        }
+        throw error;
+      });
 
     if (!updated[0]) {
+      if (dto.action === MechanicServiceRequestAction.COMPLETE) {
+        const job = await this.serviceRequestsRepository.findOneBy({ id: requestId, mechanicId });
+        if (
+          job?.commissionBps != null &&
+          [ServiceRequestStatus.COMPLETED, ServiceRequestStatus.PAID].includes(job.status)
+        ) {
+          return this.getForParticipant(mechanicId, requestId);
+        }
+      }
       await this.throwMechanicTransitionFailure(mechanicId, requestId, dto.action);
     }
 
@@ -258,7 +280,7 @@ export class ServiceRequestsService {
   async cancel(customerId: string, requestId: string): Promise<ServiceRequestResponse> {
     const updated = await this.serviceRequestsRepository.query<UpdatedRequestRow[]>(
       `
-        UPDATE "service_requests"
+        WITH changed AS (UPDATE "service_requests"
         SET
           "status" = 'cancelled',
           "cancelled_at" = NOW(),
@@ -266,7 +288,7 @@ export class ServiceRequestsService {
         WHERE "id" = $1
           AND "customer_id" = $2
           AND "status" = 'open'
-        RETURNING "id"
+        RETURNING "id") SELECT id FROM changed
       `,
       [requestId, customerId],
     );
@@ -281,7 +303,7 @@ export class ServiceRequestsService {
   async confirmCashPayment(customerId: string, requestId: string): Promise<ServiceRequestResponse> {
     const updated = await this.serviceRequestsRepository.query<UpdatedRequestRow[]>(
       `
-        UPDATE "service_requests"
+        WITH changed AS (UPDATE "service_requests"
         SET
           "status" = 'paid',
           "paid_at" = NOW(),
@@ -289,7 +311,7 @@ export class ServiceRequestsService {
         WHERE "id" = $1
           AND "customer_id" = $2
           AND "status" = 'completed'
-        RETURNING "id"
+        RETURNING "id") SELECT id FROM changed
       `,
       [requestId, customerId],
     );
@@ -321,6 +343,9 @@ export class ServiceRequestsService {
     }
     if (request.mechanicId !== mechanicId) {
       throw new NotFoundException('Service request not found.');
+    }
+    if (request.commissionBps != null && sandboxRate() === null) {
+      throw new ForbiddenException('Test wallet is disabled.');
     }
 
     throw new ConflictException(
@@ -371,6 +396,7 @@ export class ServiceRequestsService {
 
   private toResponse(row: ServiceRequestRow): ServiceRequestResponse {
     return {
+      priced: row.commission_bps != null,
       id: row.id,
       status: row.status,
       serviceType: row.service_type,

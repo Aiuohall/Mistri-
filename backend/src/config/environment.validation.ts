@@ -5,9 +5,12 @@ export interface EnvironmentVariables {
   PORT: number;
   CORS_ORIGINS: string;
   ENABLE_SWAGGER: boolean;
+  MISTRI_WALLET_SANDBOX: boolean;
+  MISTRI_TEST_COMMISSION_BPS: number;
   DATABASE_URL: string;
   DATABASE_SSL: boolean;
   SUPABASE_URL: string;
+  SUPABASE_PUBLISHABLE_KEY?: string;
   SUPABASE_JWT_AUDIENCE: string;
 }
 
@@ -37,6 +40,12 @@ const corsOriginsSchema = Joi.string().custom((value: string, helpers) => {
 const environmentSchema = Joi.object<EnvironmentVariables>({
   NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
   PORT: Joi.number().port().default(3000),
+  MISTRI_WALLET_SANDBOX: Joi.when('NODE_ENV', {
+    is: 'production',
+    then: Joi.boolean().valid(false).default(false),
+    otherwise: Joi.boolean().default(false),
+  }),
+  MISTRI_TEST_COMMISSION_BPS: Joi.number().integer().min(1000).max(1500).default(1000),
   CORS_ORIGINS: Joi.when('NODE_ENV', {
     is: 'production',
     then: corsOriginsSchema.required(),
@@ -65,6 +74,11 @@ const environmentSchema = Joi.object<EnvironmentVariables>({
       .uri({ scheme: ['https'] })
       .required(),
     otherwise: supabaseUrlSchema.default('http://127.0.0.1:54321'),
+  }),
+  SUPABASE_PUBLISHABLE_KEY: Joi.when('NODE_ENV', {
+    is: 'production',
+    then: Joi.string().min(1).required(),
+    otherwise: Joi.string().allow('').optional(),
   }),
   SUPABASE_JWT_AUDIENCE: Joi.string().default('authenticated'),
 }).unknown(true);

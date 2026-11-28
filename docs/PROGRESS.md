@@ -2,8 +2,8 @@
 
 ## Current phase
 
-**Phase 7 — implemented locally: live job updates, push delivery, private chat, and reviews.**
-Live Supabase/API and native-device acceptance checks remain external setup work.
+**Phase 8 pricing and wallet accounting is implemented for the local sandbox.**
+Live provider operations and the signed-in native-device acceptance run remain pending.
 
 ### Completed
 
@@ -157,8 +157,12 @@ Live Supabase/API and native-device acceptance checks remain external setup work
 
 ## Next phase
 
-Complete the live Supabase/API and physical-device acceptance checks for Phases 5–7,
-including live push delivery. Phase 8 introduces quoting and wallet accounting.
+Phase 8 adds bilingual quote proposal and acceptance, commission reservations, one debit
+on completion, test top-ups, audited reversals and wallet reconciliation. See the
+[Phase 8 setup and acceptance notes](PHASE_8_SPEC.md).
+
+Complete the live Supabase/API and physical-device acceptance checks for Phases 5–8,
+including push delivery and the two-account quote flow. Phase 9 adds the staff console.
 
 ## Known issues
 

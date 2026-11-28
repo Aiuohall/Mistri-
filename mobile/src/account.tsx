@@ -15,6 +15,7 @@ import {
 } from './push-installation';
 import { stopMechanicBackgroundLocation } from './mechanic-location';
 import { Button, Field, Heading, Notice, useCopy } from './ui';
+import type { TranslationKey } from './i18n/translations';
 
 export function Account() {
   const c = useCopy();
@@ -24,10 +25,12 @@ export function Account() {
     'loading',
   );
   const [verifiedUserId, setVerifiedUserId] = useState<string | null>(null);
+  const [walletSandbox, setWalletSandbox] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [authIssue, setAuthIssue] = useState<TranslationKey | null>(null);
   const [sent, setSent] = useState(false);
   const [retry, setRetry] = useState(0);
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -90,6 +93,12 @@ export function Account() {
               profile && typeof profile === 'object' && 'role' in profile ? profile.role : null;
             if (nextRole === 'customer' || nextRole === 'mechanic') {
               setRole(nextRole);
+              setWalletSandbox(
+                !!profile &&
+                  typeof profile === 'object' &&
+                  'walletSandbox' in profile &&
+                  profile.walletSandbox === true,
+              );
               setVerifiedUserId(session.user.id);
             } else {
               setRole('denied');
@@ -166,16 +175,32 @@ export function Account() {
     if (!auth || busy) return;
     setBusy(true);
     setError(false);
+    setAuthIssue(null);
     setSent(false);
     try {
       const result = register
         ? await auth.auth.signUp({ email: email.trim(), password })
         : await auth.auth.signInWithPassword({ email: email.trim(), password });
       if (result.error) throw result.error;
+      if (result.data.session) setSession(result.data.session);
       setPassword('');
       setSent(register && !result.data.session);
-    } catch {
-      setError(true);
+    } catch (failure) {
+      const detail = failure as { code?: string; name?: string; message?: string };
+      if (detail.code === 'email_not_confirmed') {
+        setAuthIssue('account.auth_email_not_confirmed');
+      } else if (detail.code === 'invalid_credentials') {
+        setAuthIssue('account.auth_invalid_credentials');
+      } else if (
+        detail.name === 'AuthRetryableFetchError' ||
+        /fetch|network|timeout/i.test(detail.message ?? '')
+      ) {
+        setAuthIssue('account.auth_connection_error');
+      } else if (detail.code === 'weak_password') {
+        setAuthIssue('account.auth_weak_password');
+      } else {
+        setAuthIssue('account.auth_unknown_error');
+      }
     } finally {
       setBusy(false);
     }
@@ -202,7 +227,11 @@ export function Account() {
           autoCapitalize="none"
           autoComplete="current-password"
         />
-        {error && <Notice>{c('account.signin_failed_check_your_details_and_connection')}</Notice>}
+        {(error || authIssue) && (
+          <Notice>
+            {c(authIssue ?? 'account.signin_failed_check_your_details_and_connection')}
+          </Notice>
+        )}
         {sent && <Text>{c('account.check_your_email_to_confirm_your_account')}</Text>}
         <Button
           title={c('account.sign_in')}
@@ -243,7 +272,12 @@ export function Account() {
           {role === 'customer' ? (
             <Customer userId={session.user.id} api={api} expired={() => void signOut()} />
           ) : (
-            <Mechanic userId={session.user.id} api={api} expired={() => void signOut()} />
+            <Mechanic
+              userId={session.user.id}
+              api={api}
+              expired={() => void signOut()}
+              walletSandbox={walletSandbox}
+            />
           )}
         </JobUpdates>
       )}
