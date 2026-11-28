@@ -72,6 +72,9 @@ export class AvailableServiceRequestResponse {
 }
 
 export class ServiceRequestResponse {
+  @ApiProperty()
+  priced!: boolean;
+
   @ApiProperty({ format: 'uuid' })
   id!: string;
 

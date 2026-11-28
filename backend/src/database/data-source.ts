@@ -12,6 +12,7 @@ import { CreateMechanics1763540000000 } from './migrations/1763540000000-create-
 import { CreateVehiclesAndServiceRequests1763620000000 } from './migrations/1763620000000-create-vehicles-and-service-requests';
 import { AddPaidServiceRequestStatus1763630000000 } from './migrations/1763630000000-add-paid-service-request-status';
 import { AddJobEngagement1763640000000 } from './migrations/1763640000000-add-job-engagement';
+import { AddSettlement1763650000000 } from './migrations/1763650000000-add-settlement';
 
 loadEnvironment();
 
@@ -31,6 +32,7 @@ export const appDataSource = new DataSource({
     CreateVehiclesAndServiceRequests1763620000000,
     AddPaidServiceRequestStatus1763630000000,
     AddJobEngagement1763640000000,
+    AddSettlement1763650000000,
   ],
   migrationsTableName: 'typeorm_migrations',
   synchronize: false,

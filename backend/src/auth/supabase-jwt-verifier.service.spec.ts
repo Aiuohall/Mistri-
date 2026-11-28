@@ -26,6 +26,7 @@ function createVerifier(): {
 
       return values[key as keyof typeof values];
     }),
+    get: jest.fn(() => 'sb_publishable_test'),
   } as unknown as ConfigService<EnvironmentVariables, true>;
   const verifier = new SupabaseJwtVerifier(config);
   const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
@@ -94,5 +95,27 @@ describe('SupabaseJwtVerifier', () => {
     });
 
     await expect(verifier.verifyAccessToken(token)).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+  it('accepts a legacy session only when the project auth server confirms its subject', async () => {
+    const { verifier } = createVerifier();
+    const token = sign({}, 'local-test-fixture', {
+      algorithm: 'HS256',
+      audience: 'authenticated',
+      issuer,
+      subject: userId,
+      expiresIn: 60,
+    });
+    const fetcher = jest.spyOn(globalThis, 'fetch');
+    try {
+      fetcher
+        .mockResolvedValueOnce(Response.json({ id: userId }))
+        .mockResolvedValueOnce(Response.json({ id: 'different' }))
+        .mockResolvedValueOnce(new Response(null, { status: 401 }));
+      await expect(verifier.verifyAccessToken(token)).resolves.toEqual({ id: userId });
+      await expect(verifier.verifyAccessToken(token)).rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(verifier.verifyAccessToken(token)).rejects.toBeInstanceOf(UnauthorizedException);
+    } finally {
+      fetcher.mockRestore();
+    }
   });
 });

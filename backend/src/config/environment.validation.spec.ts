@@ -20,6 +20,7 @@ describe('validateEnvironment', () => {
         DATABASE_URL: 'postgresql://mistri:password@db.example.com/mistri',
         DATABASE_SSL: true,
         SUPABASE_URL: 'https://mistri.supabase.co',
+        SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test',
       }),
     ).toThrow('Invalid environment configuration');
   });
@@ -32,6 +33,7 @@ describe('validateEnvironment', () => {
         DATABASE_URL: 'postgresql://mistri:password@db.example.com/mistri',
         DATABASE_SSL: true,
         SUPABASE_URL: 'https://mistri.supabase.co',
+        SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test',
       }),
     ).toMatchObject({
       ENABLE_SWAGGER: false,

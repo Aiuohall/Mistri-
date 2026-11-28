@@ -32,6 +32,7 @@ describe('ServiceRequestsService', () => {
     customerId,
     vehicleId,
     mechanicId: null,
+    commissionBps: null,
     serviceType: 'flat_tire',
     description: 'Rear-left tire is flat.',
     location: { type: 'Point', coordinates: [90.3742, 23.7525] },
@@ -253,7 +254,13 @@ describe('ServiceRequestsService', () => {
     ).rejects.toBeInstanceOf(ConflictException);
     expect(requestsRepository.query).toHaveBeenCalledWith(
       expect.stringContaining('AND "status" = $4'),
-      [ServiceRequestStatus.COMPLETED, requestId, mechanicId, ServiceRequestStatus.IN_PROGRESS],
+      [
+        ServiceRequestStatus.COMPLETED,
+        requestId,
+        mechanicId,
+        ServiceRequestStatus.IN_PROGRESS,
+        false,
+      ],
     );
   });
 

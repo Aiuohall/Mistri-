@@ -23,6 +23,7 @@ export type RequestStatus = (typeof statuses)[number];
 export type MechanicAction = 'start_travel' | 'arrive' | 'start_service' | 'complete';
 
 export type Job = {
+  priced?: boolean;
   id: string;
   status: RequestStatus;
   serviceType: string;
@@ -125,6 +126,7 @@ export function isJob(value: unknown): value is Job {
   return (
     typeof j.id === 'string' &&
     statuses.includes(j.status) &&
+    (j.priced === undefined || typeof j.priced === 'boolean') &&
     isVehicle(j.vehicle) &&
     typeof j.description === 'string' &&
     typeof j.serviceType === 'string' &&

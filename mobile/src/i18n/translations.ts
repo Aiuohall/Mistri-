@@ -1,6 +1,33 @@
 import { getLocales } from 'expo-localization';
 import { I18n } from 'i18n-js';
 export const english = {
+  'settlement.pricing': 'Test job pricing',
+  'settlement.cash': 'Agreed cash price',
+  'settlement.commission': 'Commission paid by mechanic',
+  'settlement.unagreed': 'No price agreed yet.',
+  'settlement.proposed': 'Proposed cash price',
+  'settlement.amount': 'Amount in taka',
+  'settlement.propose': 'Send quote',
+  'settlement.accept': 'Accept this cash price',
+  'settlement.fund': 'Top up your test wallet to cover this commission.',
+  'settlement.wait': 'The mechanic needs to top up their test wallet to cover this commission.',
+  'settlement.conflict':
+    'Pricing changed or funds are insufficient. Review the latest quote before retrying.',
+  'settlement.refresh_quote': 'Refresh pricing',
+  'settlement.wallet': 'Test wallet',
+  'settlement.balance': 'Balance',
+  'settlement.reserved': 'Reserved for active jobs',
+  'settlement.reference': 'Test bKash reference (6–40 letters or digits)',
+  'settlement.submit': 'Submit test top-up',
+  'settlement.duplicate': 'That transfer reference is already in use.',
+  'settlement.history': 'Recent wallet entries',
+  'settlement.topup': 'Top-up credit',
+  'settlement.commission_debit': 'Job commission',
+  'settlement.refund': 'Commission refund',
+  'settlement.approved': 'Approved',
+  'settlement.rejected': 'Rejected',
+  'settlement.pending': 'Pending verification',
+  'settlement.refresh_wallet': 'Refresh wallet',
   'app.name': 'Mistri',
   'common.retry': 'Try again',
   'home.tagline': 'Roadside assistance, when you need it.',
@@ -14,6 +41,16 @@ export const english = {
   'account.password': 'Password',
   'account.signin_failed_check_your_details_and_connection':
     'Sign-in failed. Check your details and connection.',
+  'account.auth_invalid_credentials':
+    'That email and password do not match. Use the password you chose when creating this account.',
+  'account.auth_email_not_confirmed':
+    'This email is not confirmed yet. Open the latest confirmation email and confirm the account.',
+  'account.auth_connection_error':
+    'Could not reach the sign-in service. Check the phone’s internet connection and try again.',
+  'account.auth_weak_password':
+    'This password does not meet the project’s password rules. Choose a stronger password.',
+  'account.auth_unknown_error':
+    'The sign-in service rejected this request. Check the account in Supabase Authentication → Users.',
   'account.check_your_email_to_confirm_your_account': 'Check your email to confirm your account.',
   'account.sign_in': 'Sign in',
   'account.create_account': 'Create account',
@@ -151,6 +188,33 @@ export const english = {
 } as const;
 export type TranslationKey = keyof typeof english;
 export const bangla: Partial<Record<TranslationKey, string>> = {
+  'settlement.pricing': 'পরীক্ষামূলক কাজের মূল্য',
+  'settlement.cash': 'সম্মত নগদ মূল্য',
+  'settlement.commission': 'মিস্ত্রির প্রদেয় কমিশন',
+  'settlement.unagreed': 'এখনও মূল্য নির্ধারিত হয়নি।',
+  'settlement.proposed': 'প্রস্তাবিত নগদ মূল্য',
+  'settlement.amount': 'টাকার পরিমাণ',
+  'settlement.propose': 'মূল্য প্রস্তাব পাঠান',
+  'settlement.accept': 'এই নগদ মূল্য গ্রহণ করুন',
+  'settlement.fund': 'এই কমিশনের জন্য আপনার পরীক্ষামূলক ওয়ালেটে টাকা যোগ করুন।',
+  'settlement.wait': 'এই কমিশনের জন্য মিস্ত্রিকে তাঁর পরীক্ষামূলক ওয়ালেটে টাকা যোগ করতে হবে।',
+  'settlement.conflict':
+    'মূল্য বদলেছে অথবা ওয়ালেটে পর্যাপ্ত টাকা নেই। আবার চেষ্টা করার আগে সর্বশেষ প্রস্তাব দেখুন।',
+  'settlement.refresh_quote': 'মূল্য হালনাগাদ করুন',
+  'settlement.wallet': 'পরীক্ষামূলক ওয়ালেট',
+  'settlement.balance': 'মোট ব্যালেন্স',
+  'settlement.reserved': 'চলমান কাজের জন্য সংরক্ষিত',
+  'settlement.reference': 'পরীক্ষামূলক বিকাশ রেফারেন্স (৬–৪০টি ইংরেজি অক্ষর বা সংখ্যা)',
+  'settlement.submit': 'পরীক্ষামূলক টপ-আপ জমা দিন',
+  'settlement.duplicate': 'এই লেনদেনের রেফারেন্সটি ইতিমধ্যে ব্যবহৃত হয়েছে।',
+  'settlement.history': 'সাম্প্রতিক ওয়ালেট লেনদেন',
+  'settlement.topup': 'টপ-আপ জমা',
+  'settlement.commission_debit': 'কাজের কমিশন',
+  'settlement.refund': 'কমিশন ফেরত',
+  'settlement.approved': 'অনুমোদিত',
+  'settlement.rejected': 'প্রত্যাখ্যাত',
+  'settlement.pending': 'যাচাইয়ের অপেক্ষায়',
+  'settlement.refresh_wallet': 'ওয়ালেট হালনাগাদ করুন',
   'app.name': 'মিস্ত্রি',
   'home.tagline': 'প্রয়োজনে সড়ক সহায়তা, আপনার পাশে।',
   'language.switchToBangla': 'বাংলায় দেখুন',
@@ -163,6 +227,16 @@ export const bangla: Partial<Record<TranslationKey, string>> = {
   'account.password': 'পাসওয়ার্ড',
   'account.signin_failed_check_your_details_and_connection':
     'সাইন ইন হয়নি। তথ্য ও সংযোগ পরীক্ষা করুন।',
+  'account.auth_invalid_credentials':
+    'এই ইমেইল ও পাসওয়ার্ড মিলছে না। অ্যাকাউন্ট তৈরির সময় যে পাসওয়ার্ড দিয়েছিলেন সেটি ব্যবহার করুন।',
+  'account.auth_email_not_confirmed':
+    'ইমেইল এখনও নিশ্চিত হয়নি। সর্বশেষ নিশ্চিতকরণ ইমেইল খুলে অ্যাকাউন্ট নিশ্চিত করুন।',
+  'account.auth_connection_error':
+    'সাইন ইন সেবায় সংযোগ করা যায়নি। ফোনের ইন্টারনেট পরীক্ষা করে আবার চেষ্টা করুন।',
+  'account.auth_weak_password':
+    'এই পাসওয়ার্ডটি প্রকল্পের নিয়ম পূরণ করছে না। আরও শক্তিশালী পাসওয়ার্ড দিন।',
+  'account.auth_unknown_error':
+    'সাইন ইন সেবা অনুরোধটি গ্রহণ করেনি। Supabase Authentication → Users-এ অ্যাকাউন্টটি দেখুন।',
   'account.check_your_email_to_confirm_your_account': 'অ্যাকাউন্ট নিশ্চিত করতে ইমেইল দেখুন।',
   'account.sign_in': 'সাইন ইন',
   'account.create_account': 'অ্যাকাউন্ট তৈরি',

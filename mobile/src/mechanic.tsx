@@ -11,6 +11,7 @@ import type {
 } from './api';
 import { MapProvider } from './map/map-provider';
 import { JobConversation } from './job-engagement';
+import { JobPricing, Wallet } from './settlement';
 import { useJobUpdate } from './job-updates';
 import {
   isMechanicBackgroundLocationRunning,
@@ -42,13 +43,15 @@ export function Mechanic({
   api,
   expired,
   userId,
+  walletSandbox = false,
 }: {
   api: ReturnType<typeof createApi>;
   expired: () => void;
   userId: string;
+  walletSandbox?: boolean;
 }) {
   const c = useCopy();
-  const [tab, setTab] = useState<'available' | 'assigned' | 'profile'>('available');
+  const [tab, setTab] = useState<'available' | 'assigned' | 'profile' | 'wallet'>('available');
   const [profile, setProfile] = useState<MechanicProfile | null>(null);
   const [availableJobs, setAvailableJobs] = useState<AvailableJob[]>([]);
   const [assignedJobs, setAssignedJobs] = useState<Job[]>([]);
@@ -177,6 +180,8 @@ export function Mechanic({
       <Button title={c('mechanic.available_jobs')} onPress={() => setTab('available')} />
       <Button title={c('mechanic.assigned_jobs')} onPress={() => setTab('assigned')} />
       <Button title={c('mechanic.profile_and_status')} onPress={() => setTab('profile')} />
+      {walletSandbox && <Button title={c('settlement.wallet')} onPress={() => setTab('wallet')} />}
+      {walletSandbox && tab === 'wallet' && <Wallet api={api} />}
       {(loading || busy) && <Text accessibilityLiveRegion="polite">{c('mechanic.loading')}</Text>}
       {error && <Notice>{c('mechanic.unable_to_save_or_load')}</Notice>}
       {conflict && <Notice>{c('mechanic.job_already_taken')}</Notice>}
@@ -406,6 +411,18 @@ export function Mechanic({
                     </Text>
                     {j.vehicle.registrationNumber && <Text>{j.vehicle.registrationNumber}</Text>}
                     <JobConversation key={j.id} job={j} api={api} userId={userId} />
+                    {j.priced && (
+                      <JobPricing
+                        job={j}
+                        api={api}
+                        role="mechanic"
+                        onStart={
+                          nextAction === 'start_service' && !busy
+                            ? () => setConfirm({ id: j.id, action: 'start_service' })
+                            : undefined
+                        }
+                      />
+                    )}
                     <MapProvider
                       center={{ latitude: j.latitude, longitude: j.longitude }}
                       pins={[
@@ -419,7 +436,7 @@ export function Mechanic({
                       title={c('mechanic.pickup_map_title')}
                       attribution={c('mechanic.pickup_map_attribution')}
                     />
-                    {nextAction && (
+                    {nextAction && !(j.priced && nextAction === 'start_service') && (
                       <Button
                         disabled={busy}
                         title={c(`mechanic.action_${nextAction}`)}

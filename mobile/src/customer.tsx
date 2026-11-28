@@ -5,6 +5,7 @@ import { ApiError, isJob, isNearbyMechanic, isVehicle, readList } from './api';
 import type { Job, NearbyMechanic, Vehicle, createApi } from './api';
 import { MapProvider } from './map/map-provider';
 import { JobConversation, JobReview } from './job-engagement';
+import { JobPricing } from './settlement';
 import { useJobUpdate } from './job-updates';
 import { Button, Field, Heading, Notice, styles, useCopy } from './ui';
 
@@ -360,6 +361,7 @@ export function Customer({
                   {j.vehicle.registrationNumber && <Text>{j.vehicle.registrationNumber}</Text>}
                   {j.mechanic && <Text>{j.mechanic.displayName}</Text>}
                   {j.mechanic && <JobConversation key={j.id} job={j} api={api} userId={userId} />}
+                  {j.priced && <JobPricing job={j} api={api} role="customer" />}
                   {(j.status === 'completed' || j.status === 'paid') && (
                     <JobReview jobId={j.id} api={api} />
                   )}
